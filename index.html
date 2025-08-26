@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Currículos AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2c3e50',
+                        secondary: '#3498db',
+                        accent: '#e74c3c',
+                        light: '#ecf0f1',
+                        dark: '#2c3e50',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        
+        .split-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .form-section {
+            width: 50%;
+            background: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #e2e8f0;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .preview-section {
+            width: 50%;
+            padding: 20px;
+            background: #f1f5f9;
+            overflow-y: auto;
+        }
+        
+        .cv-preview {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 30px;
+            min-height: 95%;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+        
+        .skill-item, .experience-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .char-count {
+            font-size: 0.875rem;
+            color: #64748b;
+            text-align: right;
+            margin-top: 4px;
+        }
+        
+        .ai-enhance-btn {
+            background: transparent;
+            border: 1px dashed #3498db;
+            color: #3498db;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        
+        .ai-enhance-btn:hover {
+            background: #ebf5fb;
+        }
+        
+        .empty-state {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+        }
+        
+        .empty-state i {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #94a3b8;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            list-style: none;
+        }
+        
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #3498db;
+        }
+        
+        .timeline-item {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #3498db;
+        }
+        
+        .preview-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .preview-header h1 {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .preview-header h2 {
+            font-size: 1.2rem;
+            color: #3498db;
+            font-weight: 500;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+        }
+        
+        .skill-bar {
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+        
+        .skill-level {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 4px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            background: #10b981;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+        
+        .toast.error {
+            background: #ef4444;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="split-layout">
+        <!-- Seção do Formulário -->
+        <div class="form-section">
+            <h1 class="text-2xl font-bold text-primary mb-6">Informações do Currículo
+</h1>
+            
+            <!-- Dados Pessoais -->
+            <div class="mb-8">
+                <h2 class="section-title">Dados Pessoais</h2>
+                
+                <div class="form-group">
+                    <label for="name">Nome Completo</label>
+                    <input type="text" id="name" placeholder="Seu nome completo">
+                </div>
+                
+        
+                
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" placeholder="seuemail@exemplo.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Telefone</label>
+                    <input type="text" id="phone" placeholder="(11) 99999-9999">
+                </div>
+                
+                <div class="form-group">
+                    <label for="linkedin">LinkedIn</label>
+                    <input type="text" id="linkedin" placeholder="linkedin.com/in/seunome">
+                </div>
+                
+                <div class="form-group">
+                    <label for="summary">Resumo Profissional</label>
+                    <textarea id="summary" placeholder="Descreva brevemente sua experiência e habilidades"></textarea>
+                    <div class="char-count"><span id="summary-count">0</span>/250 caracteres</div>
+                    <button class="ai-enhance-btn" data-target="summary">
+                        <i class="fas fa-robot"></i> Melhorar com IA
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Habilidades -->
+            <div class="mb-8">
+                <h2 class="section-title">Habilidades</h2>
+                
+                <div id="skills-container">
+                    <!-- Habilidades serão adicionadas aqui -->
+                </div>
+                
+                <button id="add-skill" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Adicionar Habilidade
+                </button>
+            </div>
+            
+            <!-- Experiências -->
+            <div class="mb-8">
+                <h2 class="section-title">Experiências Profissionais</h2>
+                
+                <div id="experiences-container">
+                    <!-- Experiências serão adicionadas aqui -->
+                </div>
+                
+                <button id="add-experience" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Adicionar Experiência
+                </button>
+            </div>
+            
+            <!-- Ações -->
+            <div class="flex gap-3">
+                <button id="export-pdf" class="btn btn-success">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
+                <button id="reset-form" class="btn btn-secondary">
+                    <i class="fas fa-trash"></i> Limpar Tudo
+                </button>
+            </div>
+        </div>
+        
+        <!-- Seção de Preview -->
+        <div class="preview-section">
+            <h2 class="text-xl font-bold text-primary mb-4">Preview do Currículo</h2>
+            
+            <div class="cv-preview">
+                <div class="preview-header">
+                    <h1 id="preview-name">Seu Nome Completo</h1>
+                    </div>
+                
+                <div class="contact-info">
+                    <div class="contact-item" id="preview-email">
+                        <i class="fas fa-envelope"></i>
+                        <span>seu.email@exemplo.com</span>
+                    </div>
+                    <div class="contact-item" id="preview-phone">
+                        <i class="fas fa-phone"></i>
+                        <span>(11) 99999-9999</span>
+                    </div>
+                    <div class="contact-item" id="preview-linkedin">
+                        <i class="fab fa-linkedin"></i>
+                        <span>linkedin.com/in/seunome</span>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-primary mb-2">Resumo</h3>
+                    <p id="preview-summary" class="text-gray-600">Seu resumo profissional aparecerá aqui.</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-primary mb-2">Habilidades</h3>
+                    <div id="preview-skills">
+                        <div class="empty-state">
+                            <i class="fas fa-lightbulb"></i>
+                            <p>Suas habilidades aparecerão aqui</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold text-primary mb-2">Experiência Profissional</h3>
+                    <div id="preview-experiences">
+                        <div class="empty-state">
+                            <i class="fas fa-briefcase"></i>
+                            <p>Suas experiências aparecerão aqui</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos do DOM
+            const formSection = document.querySelector('.form-section');
+            const previewSection = document.querySelector('.preview-section');
+            const skillsContainer = document.getElementById('skills-container');
+            const experiencesContainer = document.getElementById('experiences-container');
+            const addSkillBtn = document.getElementById('add-skill');
+            const addExperienceBtn = document.getElementById('add-experience');
+            const exportPdfBtn = document.getElementById('export-pdf');
+            const resetFormBtn = document.getElementById('reset-form');
+            const summaryTextarea = document.getElementById('summary');
+            const summaryCount = document.getElementById('summary-count');
+            
+            // Dados do currículo
+            let cvData = {
+                name: '',
+                title: '',
+                email: '',
+                phone: '',
+                linkedin: '',
+                summary: '',
+                skills: [],
+                experiences: []
+            };
+            
+            // Inicializar a aplicação
+            function init() {
+                loadFromLocalStorage();
+                setupEventListeners();
+                updatePreview();
+                addSkillItem();
+                addExperienceItem();
+            }
+            
+            // Configurar event listeners
+            function setupEventListeners() {
+                // Dados pessoais
+                document.getElementById('name').addEventListener('input', updateCVData);
+                document.getElementById('title').addEventListener('input', updateCVData);
+                document.getElementById('email').addEventListener('input', updateCVData);
+                document.getElementById('phone').addEventListener('input', updateCVData);
+                document.getElementById('linkedin').addEventListener('input', updateCVData);
+                document.getElementById('summary').addEventListener('input', updateCVData);
+                
+                // Contador de caracteres do resumo
+                summaryTextarea.addEventListener('input', function() {
+                    summaryCount.textContent = this.value.length;
+                });
+                
+                // Botões de ação
+                addSkillBtn.addEventListener('click', addSkillItem);
+                addExperienceBtn.addEventListener('click', addExperienceItem);
+                exportPdfBtn.addEventListener('click', exportToPDF);
+                resetFormBtn.addEventListener('click', resetForm);
+                
+                // Botões de melhoria com IA
+                document.querySelectorAll('.ai-enhance-btn').forEach(btn => {
+                    btn.addEventListener('click', enhanceWithAI);
+                });
+            }
+            
+            // Atualizar dados do currículo
+            function updateCVData(e) {
+                const id = e.target.id;
+                const value = e.target.value;
+                
+                cvData[id] = value;
+                updatePreview();
+                saveToLocalStorage();
+            }
+            
+            // Adicionar item de habilidade
+            function addSkillItem() {
+                const skillId = Date.now();
+                const skillItem = document.createElement('div');
+                skillItem.className = 'skill-item';
+                skillItem.dataset.id = skillId;
+                
+                skillItem.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <label>Habilidade</label>
+                        <button class="btn btn-sm btn-secondary remove-item">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <input type="text" class="skill-name mb-2" placeholder="Ex: JavaScript">
+                    <div class="flex items-center gap-2 mb-2">
+                        <label>Nível:</label>
+                        <select class="skill-level">
+                            <option value="Básico">Básico</option>
+                            <option value="Intermediário">Intermediário</option>
+                            <option value="Avançado">Avançado</option>
+                            <option value="Especialista">Especialista</option>
+                        </select>
+                    </div>
+                `;
+                
+                skillsContainer.appendChild(skillItem);
+                
+                // Event listeners para o novo item
+                skillItem.querySelector('.skill-name').addEventListener('input', updateSkills);
+                skillItem.querySelector('.skill-level').addEventListener('change', updateSkills);
+                skillItem.querySelector('.remove-item').addEventListener('click', function() {
+                    skillItem.remove();
+                    updateSkills();
+                });
+                
+                updateSkills();
+            }
+            
+            // Atualizar lista de habilidades
+            function updateSkills() {
+                cvData.skills = [];
+                document.querySelectorAll('.skill-item').forEach(item => {
+                    const name = item.querySelector('.skill-name').value;
+                    const level = item.querySelector('.skill-level').value;
+                    
+                    if (name) {
+                        cvData.skills.push({ name, level });
+                    }
+                });
+                
+                updatePreview();
+                saveToLocalStorage();
+            }
+            
+            // Adicionar item de experiência
+            function addExperienceItem() {
+                const expId = Date.now();
+                const expItem = document.createElement('div');
+                expItem.className = 'experience-item';
+                expItem.dataset.id = expId;
+                
+                expItem.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <label>Experiência Profissional</label>
+                        <button class="btn btn-sm btn-secondary remove-item">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <input type="text" class="company mb-2" placeholder="Nome da empresa">
+                    <input type="text" class="job-title mb-2" placeholder="Cargo">
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <input type="text" class="start-date" placeholder="Data de início (MM/AAAA)">
+                        <input type="text" class="end-date" placeholder="Data de fim (MM/AAAA) ou Atual">
+                    </div>
+                    <textarea class="job-description" placeholder="Descrição das atividades e conquistas"></textarea>
+                    <button class="ai-enhance-btn mt-2" data-target="description">
+                        <i class="fas fa-robot"></i> Melhorar descrição com IA
+                    </button>
+                `;
+                
+                experiencesContainer.appendChild(expItem);
+                
+                // Event listeners para o novo item
+                const inputs = expItem.querySelectorAll('input, textarea');
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateExperiences);
+                });
+                
+                expItem.querySelector('.remove-item').addEventListener('click', function() {
+                    expItem.remove();
+                    updateExperiences();
+                });
+                
+                expItem.querySelector('.ai-enhance-btn').addEventListener('click', enhanceWithAI);
+                
+                updateExperiences();
+            }
+            
+            // Atualizar lista de experiências
+            function updateExperiences() {
+                cvData.experiences = [];
+                document.querySelectorAll('.experience-item').forEach(item => {
+                    const company = item.querySelector('.company').value;
+                    const jobTitle = item.querySelector('.job-title').value;
+                    const startDate = item.querySelector('.start-date').value;
+                    const endDate = item.querySelector('.end-date').value;
+                    const description = item.querySelector('.job-description').value;
+                    
+                    if (company || jobTitle) {
+                        cvData.experiences.push({
+                            company,
+                            jobTitle,
+                            startDate,
+                            endDate,
+                            description
+                        });
+                    }
+                });
+                
+                updatePreview();
+                saveToLocalStorage();
+            }
+            
+            // Atualizar preview do currículo
+            function updatePreview() {
+                // Dados pessoais
+                document.getElementById('preview-name').textContent = cvData.name || 'Seu Nome Completo';
+                document.getElementById('preview-title').textContent = cvData.title || 'Desenvolvedor Front-end';
+                document.getElementById('preview-summary').textContent = cvData.summary || 'Seu resumo profissional aparecerá aqui.';
+                
+                // Contato
+                document.getElementById('preview-email').querySelector('span').textContent = cvData.email || 'seuemail@exemplo.com';
+                document.getElementById('preview-phone').querySelector('span').textContent = cvData.phone || '(11) 99999-9999';
+                document.getElementById('preview-linkedin').querySelector('span').textContent = cvData.linkedin || 'linkedin.com/in/seunome';
+                
+                // Habilidades
+                const skillsPreview = document.getElementById('preview-skills');
+                if (cvData.skills.length > 0) {
+                    skillsPreview.innerHTML = '';
+                    cvData.skills.forEach(skill => {
+                        const levelMap = {
+                            'Básico': '30%',
+                            'Intermediário': '60%',
+                            'Avançado': '85%',
+                            'Especialista': '95%'
+                        };
+                        
+                        const skillElement = document.createElement('div');
+                        skillElement.className = 'mb-3';
+                        skillElement.innerHTML = `
+                            <div class="flex justify-between">
+                                <span class="font-medium">${skill.name}</span>
+                                <span class="text-sm text-gray-500">${skill.level}</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-level" style="width: ${levelMap[skill.level] || '50%'};"></div>
+                            </div>
+                        `;
+                        skillsPreview.appendChild(skillElement);
+                    });
+                } else {
+                    skillsPreview.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-lightbulb"></i>
+                            <p>Suas habilidades aparecerão aqui</p>
+                        </div>
+                    `;
+                }
+                
+                // Experiências
+                const expPreview = document.getElementById('preview-experiences');
+                if (cvData.experiences.length > 0) {
+                    expPreview.innerHTML = '<ul class="timeline"></ul>';
+                    const timeline = expPreview.querySelector('.timeline');
+                    
+                    cvData.experiences.forEach(exp => {
+                        const expElement = document.createElement('li');
+                        expElement.className = 'timeline-item';
+                        expElement.innerHTML = `
+                            <div class="font-semibold">${exp.jobTitle || 'Cargo'}</div>
+                            <div class="text-gray-600 mb-1">${exp.company || 'Empresa'} | ${exp.startDate || 'Início'} - ${exp.endDate || 'Fim'}</div>
+                            <p class="text-gray-700">${exp.description || 'Descrição das atividades'}</p>
+                        `;
+                        timeline.appendChild(expElement);
+                    });
+                } else {
+                    expPreview.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-briefcase"></i>
+                            <p>Suas experiências aparecerão aqui</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Melhorar texto com IA (simulado)
+            function enhanceWithAI(e) {
+                const button = e.target.closest('.ai-enhance-btn');
+                const target = button.dataset.target;
+                const originalText = target === 'description' 
+                    ? button.parentElement.querySelector('textarea').value
+                    : document.getElementById('summary').value;
+                
+                // Simular processamento de IA
+                button.innerHTML = '<div class="loading-spinner"></div> Processando...';
+                button.disabled = true;
+                
+                setTimeout(() => {
+                    // Textos de exemplo melhorados (em um caso real, viriam de uma API de IA)
+                    const enhancedTexts = {
+                        summary: "Desenvolvedor front-end com 5 anos de experiência, especializado em criar interfaces de usuário responsivas e acessíveis. Apaixonado por resolver problemas complexos com soluções simples e eficientes. Domínio de HTML5, CSS3, JavaScript e frameworks modernos como React e Vue.js.",
+                        description: "Desenvolvimento de aplicações web utilizando React e Vue.js. Implementação de práticas de CI/CD e testes automatizados. Liderança técnica de equipe de 5 desenvolvedores. Otimização de performance e SEO."
+                    };
+                    
+                    const enhancedText = enhancedTexts[target] || "Texto melhorado com foco em clareza e impacto profissional.";
+                    
+                    if (target === 'description') {
+                        button.parentElement.querySelector('textarea').value = enhancedText;
+                        updateExperiences();
+                    } else {
+                        document.getElementById('summary').value = enhancedText;
+                        summaryCount.textContent = enhancedText.length;
+                        updateCVData({target: {id: 'summary', value: enhancedText}});
+                    }
+                    
+                    button.innerHTML = '<i class="fas fa-robot"></i> Melhorar com IA';
+                    button.disabled = false;
+                    
+                    showToast('Texto melhorado com sucesso!');
+                }, 1500);
+            }
+            
+            // Exportar para PDF (simulado)
+            function exportToPDF() {
+                exportPdfBtn.innerHTML = '<div class="loading-spinner"></div> Gerando PDF...';
+                
+                setTimeout(() => {
+                    exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Exportar PDF';
+                    showToast('PDF gerado com sucesso! Em uma implementação real, o download começaria agora.');
+                }, 2000);
+            }
+            
+            // Resetar formulário
+            function resetForm() {
+                if (confirm('Tem certeza que deseja limpar todos os dados?')) {
+                    // Limpar dados
+                    cvData = {
+                        name: '',
+                        title: '',
+                        email: '',
+                        phone: '',
+                        linkedin: '',
+                        summary: '',
+                        skills: [],
+                        experiences: []
+                    };
+                    
+                    // Limpar formulários
+                    document.getElementById('name').value = '';
+                    document.getElementById('title').value = '';
+                    document.getElementById('email').value = '';
+                    document.getElementById('phone').value = '';
+                    document.getElementById('linkedin').value = '';
+                    document.getElementById('summary').value = '';
+                    summaryCount.textContent = '0';
+                    
+                    // Limpar habilidades e experiências
+                    skillsContainer.innerHTML = '';
+                    experiencesContainer.innerHTML = '';
+                    
+                    // Adicionar um item vazio de cada
+                    addSkillItem();
+                    addExperienceItem();
+                    
+                    // Atualizar preview
+                    updatePreview();
+                    
+                    // Limpar localStorage
+                    localStorage.removeItem('cvData');
+                    
+                    showToast('Formulário limpo com sucesso!');
+                }
+            }
+            
+            // Mostrar notificação
+            function showToast(message, isError = false) {
+                const toast = document.createElement('div');
+                toast.className = `toast ${isError ? 'error' : ''} fade-in`;
+                toast.innerHTML = `
+                    <i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+            
+            // Salvar no localStorage
+            function saveToLocalStorage() {
+                localStorage.setItem('cvData', JSON.stringify(cvData));
+            }
+            
+            // Carregar do localStorage
+            function loadFromLocalStorage() {
+                const savedData = localStorage.getItem('cvData');
+                if (savedData) {
+                    cvData = JSON.parse(savedData);
+                    
+                    // Preencher campos de dados pessoais
+                    document.getElementById('name').value = cvData.name;
+                    document.getElementById('title').value = cvData.title;
+                    document.getElementById('email').value = cvData.email;
+                    document.getElementById('phone').value = cvData.phone;
+                    document.getElementById('linkedin').value = cvData.linkedin;
+                    document.getElementById('summary').value = cvData.summary;
+                    summaryCount.textContent = cvData.summary.length;
+                    
+                    // Preencher habilidades
+                    cvData.skills.forEach(skill => {
+                        addSkillItem();
+                        const lastSkill = skillsContainer.lastElementChild;
+                        lastSkill.querySelector('.skill-name').value = skill.name;
+                        lastSkill.querySelector('.skill-level').value = skill.level;
+                    });
+                    
+                    // Preencher experiências
+                    cvData.experiences.forEach(exp => {
+                        addExperienceItem();
+                        const lastExp = experiencesContainer.lastElementChild;
+                        lastExp.querySelector('.company').value = exp.company;
+                        lastExp.querySelector('.job-title').value = exp.jobTitle;
+                        lastExp.querySelector('.start-date').value = exp.startDate;
+                        lastExp.querySelector('.end-date').value = exp.endDate;
+                        lastExp.querySelector('.job-description').value = exp.description;
+                    });
+                    
+                    // Se não havia dados, remover os itens vazios extras
+                    if (cvData.skills.length === 0) {
+                        skillsContainer.innerHTML = '';
+                    }
+                    
+                    if (cvData.experiences.length === 0) {
+                        experiencesContainer.innerHTML = '';
+                    }
+                }
+            }
+            
+            // Inicializar a aplicação
+            init();
+        });
+    </script>
+</body>
+</html>
